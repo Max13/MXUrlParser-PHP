@@ -6,7 +6,7 @@ namespace   MX\UrlParser;
  *
  * @details     URL/URI parser
  *
- * @version     0.1.2
+ * @version     0.1.3
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -28,7 +28,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '0.1.2';
+    const VERSION = '0.1.3';
 
     /**
      * Complete URL/URI
@@ -86,12 +86,16 @@ class UrlParser
             $t_url = "http:$_url";
         } elseif (strncmp($_url, '://', 2) === 0) {
             $b = true;
-            $t_url = "http$url";
+            $t_url = "http$_url";
+        } elseif (strpos($_url, '://') === false) {
+            $b = true;
+            $t_url = "http://$_url";
         }
-        $this->m_url = ltrim($t_url, ':/');
-        if (($urlParts = parse_url($this->m_url)) === false) {
+        $t_url = ltrim($t_url, ':/');
+        if (($urlParts = parse_url($t_url)) === false) {
             return;
         }
+        $this->m_url = $b ? $_url : $t_url;
         // ---
 
         // Associate URL parts
@@ -113,7 +117,7 @@ class UrlParser
         $this->m_hostParts['domain'] = substr(
             substr($this->m_urlParts['host'], strlen($this->m_hostParts['subdomain']) + 1),
             0,
-            strlen($this->m_urlParts['host']) - strlen($this->m_hostParts['tld']) - strlen($this->m_hostParts['subdomain']) - 2
+            strlen($this->host) - strlen($this->tld) - strlen($this->subdomain) - 2
         );
         // ---
     }
@@ -151,11 +155,25 @@ class UrlParser
         }
 
         $i = -1;
+        $host_dot_match = preg_match_all('/\./', $host, $host_matches, PREG_OFFSET_CAPTURE);
         while (($psl_buf = rtrim(fgets($f_psl))) && strlen($psl_buf) > 1) {
             $psl_buf = ".$psl_buf";
             if ($psl_buf[1] == '*') {
-                $host_dot_match = preg_match_all('/\./', $host, $host_matches, PREG_OFFSET_CAPTURE);
-                $psl_buf = substr($host, $host_matches[0][$host_dot_match - 2][1]);
+                $psl_dot_match = preg_match_all('/\./', $psl_buf, $psl_matches, PREG_OFFSET_CAPTURE);
+
+                $b = false;
+                for ($j=1,$z=min($psl_dot_match, $host_dot_match) - 1; $j<=$z; $j++) {
+                    if (($psl_tld = substr($psl_buf, $psl_matches[0][$psl_dot_match - $j][1]))
+                        != ($host_tld = substr($host, $host_matches[0][$host_dot_match - $j][1]))) {
+                            $b = true;
+                            break;
+                    }
+                }
+                if ($b) { // Didn't match
+                    continue;
+                }
+
+                $psl_buf = substr($host, $host_matches[0][$host_dot_match - $psl_dot_match][1]);
                 $t_tld = $psl_buf;
             } else {
                 $t_tld = substr($host, (0 - strlen($psl_buf)));
@@ -169,7 +187,8 @@ class UrlParser
         }
 
         fclose($f_psl);
-        return $subdomains[$i];
+        return ($i < 0) ? substr($host, $host_matches[0][$host_dot_match - 1][1])
+                        : $subdomains[$i];
     }
 
     /**
