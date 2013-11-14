@@ -1,0 +1,22 @@
+{
+    "name": "max13/url-parser",
+    "description": "URL parser for PHP, allow you to extract every piece of information of a URL/HOST, structured and clean.",
+    "keywords": ["parser", "url", "url-parser", "laravel"],
+    "license": "CC-BY-NC-SA-3.0",
+    "authors": [
+        {
+            "name": "Adnan RIHAN",
+            "email": "adnan@rihan.fr"
+        }
+    ],
+    "homepage": "http://github.com/Max13/MXUrlParser-PHP",
+    "autoload": {
+        "psr-0" : {
+            "MX\\UrlParser" : "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.0",
+        "phpunit/phpunit": "3.7.*"
+    }
+}
