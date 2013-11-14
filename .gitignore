@@ -2,12 +2,18 @@
 # Composer specific
 #
 composer.phar
+composer.lock
 /vendor/
 
 #
 # Mac specific
 #
 .DS_Store
+
+#
+# Project specific
+#
+/data/mozilla_psl.txt
 
 #
 # Sublime-Text specific
