@@ -18,5 +18,10 @@
     "require": {
         "php": ">=5.3.0",
         "phpunit/phpunit": "3.7.*"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "bash bin/mx_psl.bash"
+        ]
     }
 }
