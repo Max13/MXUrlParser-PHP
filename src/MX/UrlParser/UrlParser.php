@@ -6,7 +6,7 @@ namespace   MX\UrlParser;
  *
  * @details     URL/URI parser
  *
- * @version     0.1.0
+ * @version     0.1.1
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -28,7 +28,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '0.1.0';
+    const VERSION = '0.1.1';
 
     /**
      * Complete URL/URI
@@ -48,7 +48,7 @@ class UrlParser
         'path'      => null,
         'query'     => null,
         'fragment'  => null,
-    );
+        );
 
     /**
      * Host parts
@@ -59,7 +59,7 @@ class UrlParser
         'subdomain' => null,
         'domain'    => null,
         'tld'       => null,
-    );
+        );
 
     // -------------------- //
 
@@ -74,19 +74,31 @@ class UrlParser
     {
         // Check if public-suffix-list is available
         if (!is_readable(MOZ_PSL)) {
-            throw new \Exception('Missing Mozilla PSL...');
+            throw new \Exception("Missing Mozilla PSL... Please run: ./bin/mx_psl.bash");
         }
         // ---
 
         // Parsing URL with PHP
-        $this->m_url = ltrim($_url, ':/');
+        $b = false;
+        $t_url = $_url;
+        if (strncmp($_url, '//', 2) === 0) {
+            $b = true;
+            $t_url = "http:$_url";
+        } elseif (strncmp($_url, '://', 2) === 0) {
+            $b = true;
+            $t_url = "http$url";
+        }
+        $this->m_url = ltrim($t_url, ':/');
         if (($urlParts = parse_url($this->m_url)) === false) {
             return;
         }
         // ---
 
         // Associate URL parts
-        foreach ($urlParts as $key => &$val) {
+        foreach ($urlParts as $key => $val) {
+            if ($b && $key == 'scheme') {
+                continue;
+            }
             $this->m_urlParts[$key] = $val;
         }
         // ---
@@ -96,29 +108,31 @@ class UrlParser
             return;
         }
 
-        $subdomain = $this->getLongestSubdomain($this->m_urlParts['host']);
-
-        while (($buffer = rtrim(fgets($f_psl)))) {
-            if ($buffer[0] != '*') {
-                $t_tld = substr($this->m_urlParts['host'], -(strlen($buffer) + 1));
-                if (strcmp($t_tld, ".$buffer") === 0) { // Match: This TLD is OK
-                    
-                    $this->m_hostParts['tld'] = $buffer;
-                    $this->m_hostParts['subdomain'] = strstr($this->m_urlParts['host'], '.', true);
-                    $this->m_hostParts['domain'] = substr(
-                        substr($this->m_urlParts['host'], strlen($this->m_hostParts['subdomain']) + 1),
-                        0,
-                        strlen($this->m_urlParts['host']) - strlen($this->m_hostParts['tld']) - strlen($this->m_hostParts['subdomain']) - 2
-                    );
-                    break;
-                } else { // Wildcard !
-                }
-            }
-        }
+        $this->m_hostParts['tld'] = substr($this->getLongestSubdomain($this->m_urlParts['host']), 1);
+        $this->m_hostParts['subdomain'] = strstr($this->m_urlParts['host'], '.', true);
+        $this->m_hostParts['domain'] = substr(
+            substr($this->m_urlParts['host'], strlen($this->m_hostParts['subdomain']) + 1),
+            0,
+            strlen($this->m_urlParts['host']) - strlen($this->m_hostParts['tld']) - strlen($this->m_hostParts['subdomain']) - 2
+        );
         // ---
     }
 
     // -------------------- //
+
+    /**
+     * Parse
+     *
+     * @var     $url    URL to parse
+     * @return  UrlParser
+     */
+    public static function parse($url)
+    {
+        $class = get_class($this);
+        $p_url = new $class($url);
+
+        return $p_url;
+    }
 
     /**
      * getLongestSubdomain
@@ -133,31 +147,67 @@ class UrlParser
         $longestOffset = 0;
 
         if (!($f_psl = fopen(MOZ_PSL, 'r'))) {
-            throw new \Exception('Can\'t read Mozilla PSL...');
+            throw new \Exception("Can't read Mozilla PSL... Make sure it's readable.");
         }
 
         $i = -1;
-        while (($psl_buf = '.'.rtrim(fgets($f_psl))) && strlen($psl_buf) > 1) {
+        while (($psl_buf = rtrim(fgets($f_psl))) && strlen($psl_buf) > 1) {
+            $psl_buf = ".$psl_buf";
             if ($psl_buf[1] == '*') {
-                continue; // For now
-                $psl_dot_count = substr_count($psl_buf, '.');
                 $host_dot_match = preg_match_all('/\./', $host, $host_matches, PREG_OFFSET_CAPTURE);
-                $psl_buf = substr($host_matches, $host_matches[$host_dot_match - 2][1]);
-                $psl_buf_len = strlen($psl_buf);
+                $psl_buf = substr($host, $host_matches[0][$host_dot_match - 2][1]);
+                $t_tld = $psl_buf;
             } else {
-                $psl_buf_len = strlen($psl_buf);
-                $t_tld = substr($host, 0 - $psl_buf_len);
-                if (strcmp($t_tld, $psl_buf) === 0) { // Match: This TLD is OK
-                    $subdomains[++$i] = $psl_buf;
-                    if (strlen($psl_buf) > strlen($subdomains[$longestOffset])) {
-                        $longestOffset = $i;
-                    }
+                $t_tld = substr($host, (0 - strlen($psl_buf)));
+            }
+            if (strcmp($t_tld, $psl_buf) === 0) { // Match: This TLD is OK
+                $subdomains[++$i] = $psl_buf;
+                if (strlen($psl_buf) > strlen($subdomains[$longestOffset])) {
+                    $longestOffset = $i;
                 }
             }
         }
 
         fclose($f_psl);
         return $subdomains[$i];
+    }
+
+    /**
+     * toArray()
+     */
+    public function toArray()
+    {
+        return $this->m_urlParts + $this->m_hostParts;
+    }
+
+    /**
+     * toString()
+     */
+    public function toString()
+    {
+        $url = null;
+
+        if (!is_null($this->m_urlParts['scheme'])) {
+            $url .= $this->m_urlParts['scheme'].'://';
+        }
+        $url .= $this->m_urlParts['user'];
+        if (!is_null($this->m_urlParts['pass'])) {
+            $url .= ':'.$this->m_urlParts['pass'].'@';
+        }
+        $url .= $this->m_urlParts['host'];
+        if (is_null($this->m_urlParts['path'])) {
+            $url .= '/';
+        } else {
+            $url .= $this->m_urlParts['path'];
+        }
+        if (!is_null($this->m_urlParts['query'])) {
+            $url .= '?'.$this->m_urlParts['query'];
+        }
+        if (!is_null($this->m_urlParts['fragment'])) {
+            $url .= '#'.$this->m_urlParts['fragment'];
+        }
+
+        return $url;
     }
 
     // -------------------- //
@@ -273,26 +323,6 @@ class UrlParser
      */
     public function __toString()
     {
-        $url = null;
-
-        if (!is_null($this->m_urlParts['scheme'])) {
-            $url .= $this->m_urlParts['scheme'].'://';
-        }
-        $url .= $this->m_urlParts['user'];
-        if (!is_null($this->m_urlParts['pass'])) {
-            $url .= ':'.$this->m_urlParts['pass'].'@';
-        }
-        $url .= $this->m_urlParts['host'];
-        if (is_null($this->m_urlParts['path'])) {
-            $url .= '/';
-        } else {
-            $url .= $this->m_urlParts['path'];
-        }
-        if (!is_null($this->m_urlParts['query'])) {
-            $url .= '?'.$this->m_urlParts['query'];
-        }
-        if (!is_null($this->m_urlParts['fragment'])) {
-            $url .= '#'.$this->m_urlParts['fragment'];
-        }
+        return $this->toString();
     }
 }
