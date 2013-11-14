@@ -6,7 +6,7 @@ namespace   MX\UrlParser;
  *
  * @details     URL/URI parser
  *
- * @version     0.1.1
+ * @version     0.1.2
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -28,7 +28,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '0.1.1';
+    const VERSION = '0.1.2';
 
     /**
      * Complete URL/URI
@@ -128,7 +128,7 @@ class UrlParser
      */
     public static function parse($url)
     {
-        $class = get_class($this);
+        $class = get_class();
         $p_url = new $class($url);
 
         return $p_url;
