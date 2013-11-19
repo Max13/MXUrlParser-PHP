@@ -3,7 +3,7 @@ MXUrlParser-PHP
 
 Description
 -----------
-**MXUrlParser** is capable of parsing a complete URL and extract some parts of it like the URL parts (using php [`parse_url()`](http://php.net/parse_url) function) and some domain name parts (using [Mozilla public suffix list](publicsuffix.org)).
+**MXUrlParser** is capable of parsing a complete URL and extract some parts of it like the URL parts (using php [`parse_url()`](http://php.net/parse_url) function) and some domain name parts (using [Mozilla public suffix list](http://publicsuffix.org)).
 
 Available parts are (Assuming URL is `https://dev.api.example.co.uk/1/2/3?key=val#anchor`):
 
