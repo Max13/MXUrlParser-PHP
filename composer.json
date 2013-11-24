@@ -22,16 +22,7 @@
         "phpunit/phpunit": "3.7.*"
     },
     "scripts": {
-        "post-install-cmd": [
-            "bash bin/mx_psl.bash"
-        ],
-        "pre-update-cmd": [
-            "bash bin/mx_psl.bash"
-        ],
-        "post-update-cmd": [
-            "bash bin/mx_psl.bash"
-        ],
-        "post-autoload-dump": [
+       "post-autoload-dump": [
             "bash bin/mx_psl.bash"
         ]
     }
