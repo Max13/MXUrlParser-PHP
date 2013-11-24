@@ -21,9 +21,7 @@
     "require-dev": {
         "phpunit/phpunit": "3.7.*"
     },
-    "scripts": {
-       "post-autoload-dump": [
-            "bash bin/mx_psl.bash"
-        ]
-    }
+    "bin": [
+        "bin/mx_psl.bash"
+    ]
 }
