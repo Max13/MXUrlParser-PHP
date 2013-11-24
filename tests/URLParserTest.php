@@ -1,6 +1,6 @@
 <?php
 
-use MX\UrlParser\UrlParser;
+use MX\UrlParser;
 
 ini_set('error_reporting', 2147483647);
 ini_set('display_errors', '1');

@@ -1,12 +1,13 @@
 <?php
-namespace   MX\UrlParser;
+
+namespace   MX;
 
 /**
  * @brief       MXUrlParser
  *
  * @details     URL/URI parser
  *
- * @version     0.1.3
+ * @version     0.1.4
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -16,7 +17,7 @@ namespace   MX\UrlParser;
 /**
  * Mozilla Public Suffix List
  */
-define('MOZ_PSL', __DIR__.'/../../../data/mozilla_psl.txt');
+define('MOZ_PSL', __DIR__.'/../../data/mozilla_psl.txt');
 
 class UrlParser
 {
@@ -28,7 +29,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '0.1.3';
+    const VERSION = '0.1.4';
 
     /**
      * Complete URL/URI
