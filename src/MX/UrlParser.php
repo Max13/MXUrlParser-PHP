@@ -7,7 +7,7 @@ namespace   MX;
  *
  * @details     URL/URI parser
  *
- * @version     0.1.4
+ * @version     1.0.0
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -29,7 +29,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '0.1.4';
+    const VERSION = '1.0.0';
 
     /**
      * Complete URL/URI
@@ -49,7 +49,7 @@ class UrlParser
         'path'      => null,
         'query'     => null,
         'fragment'  => null,
-        );
+    );
 
     /**
      * Host parts
@@ -60,25 +60,24 @@ class UrlParser
         'subdomain' => null,
         'domain'    => null,
         'tld'       => null,
-        );
+    );
+
+    /**
+     * Last error
+     *
+     * @var Last test error
+     */
+    private $m_lastError = null;
 
     // -------------------- //
 
     /**
      * Constructor
      *
-     * TODO: Add '*' parsing
-     *
      * @param[in]   $_url     The URL/URI to be passed
      */
     public function __construct($_url)
     {
-        // Check if public-suffix-list is available
-        if (!is_readable(MOZ_PSL)) {
-            throw new \Exception("Missing Mozilla PSL... Please run: ./bin/mx_psl.bash");
-        }
-        // ---
-
         // Parsing URL with PHP
         $b = false;
         $t_url = $_url;
@@ -94,6 +93,7 @@ class UrlParser
         }
         $t_url = ltrim($t_url, ':/');
         if (($urlParts = parse_url($t_url)) === false) {
+            $this->m_lastError = 'The URL seems to be seriously malformed...';
             return;
         }
         $this->m_url = $b ? $_url : $t_url;
@@ -108,8 +108,16 @@ class UrlParser
         }
         // ---
 
+        // Check if public-suffix-list is available
+        if (!is_readable(MOZ_PSL)) {
+            // throw new \Exception("Missing Mozilla PSL... Please run: ./bin/mx_psl.bash");
+            $this->m_lastError = 'Missing Mozilla PSL... Please run: ./bin/mx_psl.bash';
+            return;
+        }
+        // ---
         // Parsing hostname
         if (is_null($this->m_urlParts['host'])) {
+            $this->m_lastError = 'Malformed URL... Missing host part.';
             return;
         }
 
@@ -124,6 +132,16 @@ class UrlParser
     }
 
     // -------------------- //
+
+    /**
+     * Last Error
+     *
+     * @return string   Last parsing error string
+     */
+    public function lastError()
+    {
+        return $this->m_lastError;
+    }
 
     /**
      * Parse
