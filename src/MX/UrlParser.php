@@ -7,7 +7,7 @@ namespace   MX;
  *
  * @details     URL/URI parser
  *
- * @version     1.0.0
+ * @version     1.0
  * @author      Adnan "Max13" RIHAN <adnan@rihan.fr>
  * @link        http://rihan.fr/
  * @copyright   http://creativecommons.org/licenses/by-nc-sa/3.0/  CC-by-nc-sa 3.0
@@ -29,7 +29,7 @@ class UrlParser
     /**
      * MXUrlParser Version
      */
-    const VERSION = '1.0.0';
+    const VERSION = '1.0';
 
     /**
      * Complete URL/URI
