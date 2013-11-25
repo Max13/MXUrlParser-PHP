@@ -12,7 +12,7 @@
     "homepage": "http://github.com/Max13/MXUrlParser-PHP",
     "autoload": {
         "psr-0" : {
-            "MX\\" : "src/"
+            "" : "src/"
         }
     },
     "require": {
