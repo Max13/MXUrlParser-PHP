@@ -7,6 +7,19 @@ ini_set('display_errors', '1');
 
 class URLParserTest extends PHPUnit_Framework_TestCase
 {
+    public function testNonExistantTld()
+    {
+        $url = 'http://www.example.local/';
+
+        $parsed = new UrlParser($url);
+        $this->assertTrue($parsed->isValid());
+        $this->assertEquals($parsed->scheme, 'http');
+        $this->assertEquals($parsed->host, 'www.example.local');
+        $this->assertEquals($parsed->subdomain, 'www');
+        $this->assertEquals($parsed->domain, 'example');
+        $this->assertEquals($parsed->tld, 'local');
+    }
+
     public function testWellFormedCompleteUrl()
     {
         $url = 'https://dev.api.example.co.uk/1/2/3?key=val#anchor';
